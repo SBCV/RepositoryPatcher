@@ -54,13 +54,16 @@ $PathToRepositoryPatcher/create_patches.sh $PathToTargetRepository 1 0
 
 ## Apply a set of patch files to the target repository
 
-Before you apply the patches, ensure that the target repository is up-to-date and the `main` branch is active. Note: the `apply_patches.sh` script will add new branches in the target repository as needed.
+Before you apply the patches, ensure that the `main` branch of target repository is active and up-to-date (e.g. `HEAD` should point to the latest commit). Reason: the `apply_patches.sh` script adds a new branch (based on the current state of the `main` branch) and checkouts the desired commit (see below).
+
+To configure the main branch as described above on the command line (WARNING: `reset --hard HEAD` will PERMANENTLY DELETE modifications in the current branch) you might want to use:
 ```
 cd $PathToTargetRepository
 git reset --hard HEAD
 git switch main
 git pull
 ```
+
 Finally, apply the patches with the following command. Possible values for `<options>` are `--reject` and --`3way`. The value for `<target_commit_hash>` is optional.
 ```
 $PathToRepositoryPatcher/apply_patches.sh <tool> <options> $PathToTargetRepository <compatible_commit_hash> <target_commit_hash>
