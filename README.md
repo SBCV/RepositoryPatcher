@@ -32,24 +32,24 @@ ls -l $PathToRepositoryPatcher/apply_patches.sh
 
 Define two (temporary) variables storing the locations of the patch files and the target repository:
 ```
-export PathToPatchFiles="path/to/ColmapForVisSatPatches"
+export PathToPatchRepository="path/to/ColmapForVisSatPatches"
 export PathToTargetRepository="path/to/ColmapToBePatched"
 ```
 As an example we will use the repositories [Colmap](https://github.com/colmap/colmap) and [ColmapForVisSatPatches](https://github.com/SBCV/ColmapForVisSatPatches).
 Clone the repositories with:
 ```
 git clone https://github.com/colmap/colmap.git $PathToTargetRepository
-git clone https://github.com/SBCV/ColmapForVisSatPatches.git $PathToPatchFiles
+git clone https://github.com/SBCV/ColmapForVisSatPatches.git $PathToPatchRepository
 ```
 
 ## Create a set of patch files from the original repository
 Modify the target repository as needed. Then, run:
 ```
-$PathToRepositoryPatcher/create_patches.sh <PathToTargetRepository> <overwrite_flag> <reset_index_changes_flag>
+$PathToRepositoryPatcher/create_patches.sh <PathToPatches> <PathToTargetRepository> <overwrite_flag> <reset_index_changes_flag>
 ```
 For instance:
 ```
-$PathToRepositoryPatcher/create_patches.sh $PathToTargetRepository 1 0
+$PathToRepositoryPatcher/create_patches.sh $PathToPatchRepository/patches $PathToTargetRepository 1 0
 ```
 
 ## Apply a set of patch files to the target repository
@@ -71,7 +71,7 @@ $PathToRepositoryPatcher/apply_patches.sh <tool> <options> $PathToTargetReposito
 For instance:
 ```
 # Current patch files are created for 64916f856259d8386df96bc95e0eb28cd5fca86e (2023-03-01 20:54:52 +0000)
-$PathToRepositoryPatcher/apply_patches.sh git_apply --reject $PathToTargetRepository 64916f856259d8386df96bc95e0eb28cd5fca86e
+$PathToRepositoryPatcher/apply_patches.sh git_apply --reject $PathToPatchRepository/patches $PathToTargetRepository 64916f856259d8386df96bc95e0eb28cd5fca86e
 ```
 Note: Do NOT run `apply_patches.sh` with `sh $PathToRepositoryPatcher/apply_patches.sh` - this will not produce the required results!
 
@@ -85,7 +85,7 @@ $PathToRepositoryPatcher/apply_patches.sh <tool> <options> $PathToTargetReposito
 ```
 For instance, you can use `HEAD` to point to the latest commit.
 ```
-$PathToRepositoryPatcher/apply_patches.sh git_apply <options> $PathToTargetRepository 64916f856259d8386df96bc95e0eb28cd5fca86e HEAD
+$PathToRepositoryPatcher/apply_patches.sh git_apply <options> $PathToPatchRepository/patches $PathToTargetRepository 64916f856259d8386df96bc95e0eb28cd5fca86e HEAD
 ```
 This will iterate over all commits from `<compatible_commit_hash>` to `<target_commit_hash>` and try to individually apply each patch. If the application of the patch (i.e. the merge) fails, the script depending on the value of `<option>` will do the following:
 
@@ -99,7 +99,7 @@ After merging the hunks, use
 ```
 $PathToRepositoryPatcher/create_patches.sh $PathToTargetRepository 1 1
 ```
-to update the set of patches in `$PathToPatchFiles/patches` (overwriting previously outdated patches). Repeat this procedure until all conflicts are resolved.
+to update the set of patches in `$PathToPatchRepository/patches` (overwriting previously outdated patches). Repeat this procedure until all conflicts are resolved.
 
 ### Case `--3way`: (Recommended)
 
@@ -111,7 +111,7 @@ After merging the hunks, use
 ```
 $PathToRepositoryPatcher/create_patches.sh $PathToTargetRepository 1 1
 ```
-to update the set of patches in `$PathToPatchFiles/patches` overwriting previously generated (outdated) patches. Repeat this procedure until all conflicts are resolved.
+to update the set of patches in `$PathToPatchRepository/patches` overwriting previously generated (outdated) patches. Repeat this procedure until all conflicts are resolved.
 
 ## Useful notes
 
