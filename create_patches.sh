@@ -3,25 +3,25 @@
 # This script expects the following parameter:
 # 	the path to a (MODIFIED) colmap source directory for wich a set of patches should be computed 
 
-if [ $# -lt 1 ] || [ $# -gt 3 ]; then
-    echo "Script expects beteen 1 and 3 parameters, but ${#} provided!" >&2
-    echo "Usage: $0 <path_to_MODIFIED_colmap_source> <overwrite_flag> <reset_index_changes>"
+if [ $# -lt 2 ] || [ $# -gt 4 ]; then
+    echo "Script expects beteen 2 and 4 parameters, but ${#} provided!" >&2
+    echo "Usage: $0 <patch_dp> <path_to_MODIFIED_colmap_source> <overwrite_flag> <reset_index_changes>"
     echo "The last parameters <overwrite_flag> and <reset_index_changes> are optional."
     exit 2
 fi
 
 original_dp=$PWD
 
-modified_colmap_source_dp=$1
-overwrite_patch_file=${2:-1}   # Set 1 as default parameter
-reset_index_changes=${3:-1}    # Set 1 as default parameter
+patch_dp=$1
+modified_colmap_source_dp=$2
+overwrite_patch_file=${3:-1}   # Set 1 as default parameter
+reset_index_changes=${4:-1}    # Set 1 as default parameter
 
 echo "Reading colmap from: $modified_colmap_source_dp"
 
 # Go to the directory where the script is located
 cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd
 sh_file_dp=$PWD
-patch_dp="${sh_file_dp}/patches"
 
 echo "Creating patch files in: $patch_dp"
 
@@ -32,7 +32,7 @@ reset_file_if_only_index_changes() {
     local patch_fp=$1
     # Switch to the repository with the patch files, and check
     # if there are substantial changes in the patch file
-    cd $sh_file_dp
+    cd $patch_dp
 
     # shortstat_result=$(git diff --shortstat $patch_fp)
     numstat_result=$(git diff --numstat $patch_fp)

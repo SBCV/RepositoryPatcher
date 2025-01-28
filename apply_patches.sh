@@ -10,9 +10,9 @@
 #   - patch: https://wiki.ubuntuusers.de/patch/
 #   - wiggle: https://manpages.ubuntu.com/manpages/focal/man1/wiggle.1.html
 
-if [ $# -lt 4 ] || [ $# -gt 5 ]; then
+if [ $# -lt 5 ] || [ $# -gt 6 ]; then
     echo "Script expects between 3 and 4 parameters, but ${#} provided!" >&2
-    echo "Usage: $0 <tool> <options> <path_to_colmap_source> <colmap_compatible_commit_hash> <colmap_target_commit_hash>"
+    echo "Usage: $0 <tool> <options> <patch_dp> <target_repository_dp> <colmap_compatible_commit_hash> <colmap_target_commit_hash>"
     echo "Valid values for the <mode> parameter are reject and 3way".
     echo "The last parameter <colmap_target_hash> is optional. Can be set to HEAD."
     exit 2
@@ -20,9 +20,10 @@ fi
 
 TOOL=$1
 OPTIONS=$2
-COLMAP_TARGET_DP=$3
-COLMAP_COMPATIBLE_COMMIT_HASH=$4
-COLMAP_TARGET_COMMIT_HASH=${5:-$4}
+PATCH_DP=$3
+COLMAP_TARGET_DP=$4
+COLMAP_COMPATIBLE_COMMIT_HASH=$5
+COLMAP_TARGET_COMMIT_HASH=${6:-$5}
 
 if [ $TOOL == "git_apply" ]; then
     case "$OPTIONS" in
@@ -58,7 +59,6 @@ VISSAT_BRANCH="vissat"
 # Go to the directory where the script is located
 cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd
 SH_FILE_DP=$PWD
-PATCH_DP="${SH_FILE_DP}/patches"
 
 cd $COLMAP_TARGET_DP
 
