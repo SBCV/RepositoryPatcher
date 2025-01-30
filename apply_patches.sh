@@ -10,9 +10,9 @@
 #   - patch: https://wiki.ubuntuusers.de/patch/
 #   - wiggle: https://manpages.ubuntu.com/manpages/focal/man1/wiggle.1.html
 
-if [ $# -lt 5 ] || [ $# -gt 6 ]; then
-    echo "Script expects between 3 and 4 parameters, but ${#} provided!" >&2
-    echo "Usage: $0 <tool> <options> <patch_dp> <target_repository_dp> <colmap_compatible_commit_hash> <colmap_target_commit_hash>"
+if [ $# -lt 5 ] || [ $# -gt 7 ]; then
+    echo "Script expects between 5 and 7 parameters, but ${#} provided!" >&2
+    echo "Usage: $0 <tool> <options> <patch_dp> <target_repository_dp> <colmap_compatible_commit_hash> <colmap_target_commit_hash> <max_iterations>"
     echo "Valid values for the <mode> parameter are reject and 3way".
     echo "The last parameter <colmap_target_hash> is optional. Can be set to HEAD."
     exit 2
@@ -24,6 +24,7 @@ PATCH_DP=$3
 COLMAP_TARGET_DP=$4
 COLMAP_COMPATIBLE_COMMIT_HASH=$5
 COLMAP_TARGET_COMMIT_HASH=${6:-$5}
+max_iterations=${7:--1}
 
 if [ $TOOL == "git_apply" ]; then
     case "$OPTIONS" in
@@ -133,8 +134,13 @@ PATCH_FILES_AS_ARRAY=($(get_patch_files_as_array "$PATCH_DP"))
 #     echo "$PATCH_FILE"
 # done
 
+current_iteration=0
 for COMMIT_SHA in $COMMIT_LIST;
 do
+    if [ $current_iteration = $max_iterations ]; then
+        break
+    fi
+
     echo ""
     echo "---------------------------------------------------------------------"
     echo "-------- $COMMIT_SHA --------"
@@ -168,4 +174,5 @@ do
             git restore --staged .
         fi
     fi
+    current_iteration=$((current_iteration + 1))
 done
