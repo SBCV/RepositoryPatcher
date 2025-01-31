@@ -3,19 +3,20 @@
 # This script expects the following parameter:
 # 	the path to a (MODIFIED) colmap source directory for wich a set of patches should be computed 
 
-if [ $# -lt 2 ] || [ $# -gt 4 ]; then
+if [ $# -lt 3 ] || [ $# -gt 5 ]; then
     echo "Script expects beteen 2 and 4 parameters, but ${#} provided!" >&2
-    echo "Usage: $0 <patch_dp> <path_to_MODIFIED_colmap_source> <overwrite_flag> <reset_index_changes>"
+    echo "Usage: $0 <path_to_MODIFIED_colmap_source> <patch_dp> <commit_ofp> <overwrite_flag> <reset_index_changes>"
     echo "The last parameters <overwrite_flag> and <reset_index_changes> are optional."
     exit 2
 fi
 
 original_dp=$PWD
 
-patch_dp=$1
-modified_colmap_source_dp=$2
-overwrite_patch_file=${3:-1}   # Set 1 as default parameter
-reset_index_changes=${4:-1}    # Set 1 as default parameter
+modified_colmap_source_dp=$1
+patch_dp=$2
+commit_ofp=$3
+overwrite_patch_file=${4:-1}   # Set 1 as default parameter
+reset_index_changes=${5:-1}    # Set 1 as default parameter
 
 echo "Reading colmap from: $modified_colmap_source_dp"
 
@@ -124,5 +125,9 @@ for file_path in $git_diff_files; do
   patch_file_name="${file_path_encoded}.patch"
   create_patch $file_path $patch_file_name
 done
+
+# Write the current commit SHA to output file
+commit_sha=$(git rev-parse HEAD)
+echo "$commit_sha" > $commit_ofp
 
 cd $original_dp
