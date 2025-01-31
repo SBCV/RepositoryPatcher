@@ -128,6 +128,7 @@ done
 
 # Write the current commit SHA to output file
 commit_sha=$(git rev-parse HEAD)
-echo "$commit_sha" > $commit_ofp
+commit_date="$(git show -s --format=%ci $commit_sha)"
+echo "$commit_sha   ($commit_date)" > $commit_ofp
 
 cd $original_dp
