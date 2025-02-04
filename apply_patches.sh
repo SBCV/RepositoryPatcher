@@ -1,4 +1,6 @@
 #!/bin/bash
+SCRIPT_DP="$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd
+source "$SCRIPT_DP/patch_util.sh"
 
 # This script expects the following parameter:
 #   - mode (reject or 3way) for applying the patches
@@ -57,10 +59,6 @@ fi
 MAIN_BRANCH="main"
 VISSAT_BRANCH="vissat"
 
-# Go to the directory where the script is located
-cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd
-SH_FILE_DP=$PWD
-
 cd $COLMAP_TARGET_DP
 
 # Delete previous reject files
@@ -80,54 +78,6 @@ echo "Number commits from compatible to target commit: $COMMIT_LIST_LENGTH"
 # do
 #     echo $COMMIT_SHA
 # done
-
-get_patch_files_as_array() {
-    local patch_dir="$1"
-    patch_files_as_string=$(find "$patch_dir" -type f -name "*.patch")
-    mapfile -t patch_files_as_array <<< $patch_files_as_string
-    echo "${patch_files_as_array[@]}"
-}
-
-apply_patches() {
-    # Options:
-    #  "-v"         Verbose (useful for debugging, shows why applying patch failed)
-    #  "--reject"   Creation of *.rej files (hunks that failed to apply) 
-    #  "--3way"     this is similar to the "fuzz" option of "patch" and allows for a
-    #               less strict matching of context lines.
-    # Note: The "--reject" and "--3way" options can not be used together
-
-    # Loop through each patch file in the the patch file array
-    for PATCH in "$@";
-    do
-        if [ $TOOL == "git_apply" ]; then
-            git apply $OPTIONS $PATCH
-        elif [ $TOOL == "patch" ]; then
-            # --reject-format=FORMAT  Create 'context' or 'unified' rejects.
-            if [ $OPTIONS == "--reject" ]; then
-                # Reject descibes the default behavior of patch, so ommit any parameter
-                patch -p1 -i $PATCH
-            elif [ $OPTIONS == "--merge" ]; then
-                patch -p1 --merge -i $PATCH
-            else
-                echo "SOMETHING WENT TERRIBLY WRONG"
-                exit 1
-            fi
-        else
-            echo "SOMETHING WENT TERRIBLY WRONG"
-            exit 1
-        fi
-
-        # Check the exit status of git apply
-        if [ $? -ne 0 ]; then
-            # Return 1 if patch fails
-            echo "Failed to apply patch: $PATCH"
-            return 1
-        fi
-    done
-
-    echo "All patches applied successfully."
-    return 0
-}
 
 PATCH_FILES_AS_ARRAY=($(get_patch_files_as_array "$PATCH_DP"))
 # for PATCH_FILE in "${PATCH_FILES_AS_ARRAY[@]}"; do
