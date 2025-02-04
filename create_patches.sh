@@ -132,8 +132,7 @@ commit_date="$(git show -s --format=%ci $commit_sha)"
 commit_message="$(git log -n 1 --pretty=format:%B $COMMIT_SHA | head -n 1)"
 # Clear the file
 > $commit_ofp
-echo "$commit_sha" >> $commit_ofp
-echo "$commit_date" >> $commit_ofp
+echo "$commit_sha   ($commit_date)" >> $commit_ofp
 echo "$commit_message" >> $commit_ofp
 
 cd $original_dp
