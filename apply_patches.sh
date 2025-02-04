@@ -145,7 +145,7 @@ do
     echo "---------------------------------------------------------------------"
     echo "-------- $COMMIT_SHA --------"
     echo "-------------- ($(git show -s --format=%ci $COMMIT_SHA)) --------------"
-    echo "-------- $(git log -n 1 --pretty=format:%B $COMMIT_SHA) --------"
+    echo "-------- $(git log -n 1 --pretty=format:%B $COMMIT_SHA | head -n 1) --------"
     echo "---------------------------------------------------------------------"
     echo ""
     git switch --force $MAIN_BRANCH >/dev/null 2>&1
