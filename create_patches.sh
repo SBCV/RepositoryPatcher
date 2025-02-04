@@ -126,9 +126,14 @@ for file_path in $git_diff_files; do
   create_patch $file_path $patch_file_name
 done
 
-# Write the current commit SHA to output file
+# Write the current commit SHA and corresponding information to output file
 commit_sha=$(git rev-parse HEAD)
 commit_date="$(git show -s --format=%ci $commit_sha)"
-echo "$commit_sha   ($commit_date)" > $commit_ofp
+commit_message="$(git log -n 1 --pretty=format:%B $COMMIT_SHA | head -n 1)"
+# Clear the file
+> $commit_ofp
+echo "$commit_sha" >> $commit_ofp
+echo "$commit_date" >> $commit_ofp
+echo "$commit_message" >> $commit_ofp
 
 cd $original_dp
