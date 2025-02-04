@@ -12,6 +12,33 @@ get_patch_files_as_array() {
     echo "${patch_files_as_array[@]}"
 }
 
+apply_patch() {
+    if [ $TOOL == "git_apply" ]; then
+        git apply $OPTIONS $PATCH
+    elif [ $TOOL == "patch" ]; then
+        # --reject-format=FORMAT  Create 'context' or 'unified' rejects.
+        if [ $OPTIONS == "--reject" ]; then
+            # Reject descibes the default behavior of patch, so ommit any parameter
+            patch -p1 -i $PATCH
+        elif [ $OPTIONS == "--merge" ]; then
+            patch -p1 --merge -i $PATCH
+        else
+            echo "SOMETHING WENT TERRIBLY WRONG"
+            exit 1
+        fi
+    else
+        echo "SOMETHING WENT TERRIBLY WRONG"
+        exit 1
+    fi
+
+    # Check the exit status of git apply
+    if [ $? -ne 0 ]; then
+        # Return 1 if patch fails
+        echo "Failed to apply patch: $PATCH"
+        return 1
+    fi
+}
+
 apply_patches() {
     # Options:
     #  "-v"         Verbose (useful for debugging, shows why applying patch failed)
@@ -21,32 +48,8 @@ apply_patches() {
     # Note: The "--reject" and "--3way" options can not be used together
 
     # Loop through each patch file in the the patch file array
-    for PATCH in "$@";
-    do
-        if [ $TOOL == "git_apply" ]; then
-            git apply $OPTIONS $PATCH
-        elif [ $TOOL == "patch" ]; then
-            # --reject-format=FORMAT  Create 'context' or 'unified' rejects.
-            if [ $OPTIONS == "--reject" ]; then
-                # Reject descibes the default behavior of patch, so ommit any parameter
-                patch -p1 -i $PATCH
-            elif [ $OPTIONS == "--merge" ]; then
-                patch -p1 --merge -i $PATCH
-            else
-                echo "SOMETHING WENT TERRIBLY WRONG"
-                exit 1
-            fi
-        else
-            echo "SOMETHING WENT TERRIBLY WRONG"
-            exit 1
-        fi
-
-        # Check the exit status of git apply
-        if [ $? -ne 0 ]; then
-            # Return 1 if patch fails
-            echo "Failed to apply patch: $PATCH"
-            return 1
-        fi
+    for PATCH in "$@"; do
+        apply_patch
     done
 
     echo "All patches applied successfully."
