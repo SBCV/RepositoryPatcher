@@ -46,13 +46,48 @@ apply_patch() {
     fi
 }
 
+apply_patch_lazy() {
+    # Read the file names affected by the patch file
+    RELATIVE_FP_PAIR=$(grep -oP '(?<=a/).*' <<< $(grep -m 1 -oP 'a/.*' $PATCH))
+    # Get the first file name
+    RELATIVE_FP=$(echo $RELATIVE_FP_PAIR | cut -d' ' -f1)
+    # Get the absolute path of the file, the file is located in $COLMAP_TARGET_DP
+    ABSOLUTE_FP="./${RELATIVE_FP}"
+
+    ABSOLUTE_TEMP_FP="$ABSOLUTE_FP.tmp"
+    mv $ABSOLUTE_FP $ABSOLUTE_TEMP_FP
+    git checkout $ABSOLUTE_FP
+
+    apply_patch
+
+    # Check if ABSOLUTE_TEMP_FP and ABSOLUTE_FP are different
+    diff $ABSOLUTE_FP $ABSOLUTE_TEMP_FP > /dev/null
+    if [ $? -eq 0 ]; then
+        echo "File $ABSOLUTE_FP has not changed."
+        mv $ABSOLUTE_TEMP_FP $ABSOLUTE_FP
+    else
+        echo "File $ABSOLUTE_FP has changed."
+    fi
+}
+
+
 apply_patches() {
+    local lazy=$1
+    local target_repository_dp=$2
+    # Shift the parameters to process only the patch files
+    shift 2
+    local patches=("$@")
+
+    cd $target_repository_dp
 
     # Loop through each patch file in the the patch file array
     for PATCH in "$@"; do
-        apply_patch
+        if [ $lazy = 1 ]; then
+            apply_patch_lazy
+        else
+            apply_patch
+        fi
     done
-
     echo "All patches applied successfully."
     return 0
 }

@@ -107,7 +107,8 @@ do
     git switch --force --create $VISSAT_BRANCH $COMMIT_SHA
     echo "Set head to commit with hash $(git rev-parse HEAD)"
 
-    apply_patches "${PATCH_FILES_AS_ARRAY[@]}"
+    LAZY=0
+    apply_patches $LAZY "${PATCH_FILES_AS_ARRAY[@]}"
     APPLY_RESULT=$?
 
     if [ $APPLY_RESULT -ne 0 ]; then
