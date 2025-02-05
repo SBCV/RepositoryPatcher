@@ -56,8 +56,8 @@ apply_patch_lazy() {
 
     ABSOLUTE_TEMP_FP="$ABSOLUTE_FP.tmp"
     mv $ABSOLUTE_FP $ABSOLUTE_TEMP_FP
-    git checkout $ABSOLUTE_FP
 
+    git checkout $ABSOLUTE_FP > /dev/null 2>&1
     apply_patch
 
     # Check if ABSOLUTE_TEMP_FP and ABSOLUTE_FP are different
