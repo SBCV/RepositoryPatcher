@@ -13,6 +13,13 @@ get_patch_files_as_array() {
 }
 
 apply_patch() {
+    # Options:
+    #  "-v"         Verbose (useful for debugging, shows why applying patch failed)
+    #  "--reject"   Creation of *.rej files (hunks that failed to apply) 
+    #  "--3way"     this is similar to the "fuzz" option of "patch" and allows for a
+    #               less strict matching of context lines.
+    # Note: The "--reject" and "--3way" options can not be used together
+
     if [ $TOOL == "git_apply" ]; then
         git apply $OPTIONS $PATCH
     elif [ $TOOL == "patch" ]; then
@@ -40,12 +47,6 @@ apply_patch() {
 }
 
 apply_patches() {
-    # Options:
-    #  "-v"         Verbose (useful for debugging, shows why applying patch failed)
-    #  "--reject"   Creation of *.rej files (hunks that failed to apply) 
-    #  "--3way"     this is similar to the "fuzz" option of "patch" and allows for a
-    #               less strict matching of context lines.
-    # Note: The "--reject" and "--3way" options can not be used together
 
     # Loop through each patch file in the the patch file array
     for PATCH in "$@"; do
