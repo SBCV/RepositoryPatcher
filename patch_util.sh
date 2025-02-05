@@ -63,10 +63,8 @@ apply_patch_lazy() {
     # Check if ABSOLUTE_TEMP_FP and ABSOLUTE_FP are different
     diff $ABSOLUTE_FP $ABSOLUTE_TEMP_FP > /dev/null
     if [ $? -eq 0 ]; then
-        echo "File $ABSOLUTE_FP has not changed."
+        # Files are identical, move restore old file (to maintain the metadata)
         mv $ABSOLUTE_TEMP_FP $ABSOLUTE_FP
-    else
-        echo "File $ABSOLUTE_FP has changed."
     fi
 }
 
