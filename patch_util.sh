@@ -44,6 +44,7 @@ apply_patch() {
         echo "Failed to apply patch: $PATCH"
         return 1
     fi
+    return 0
 }
 
 apply_patch_lazy() {
@@ -59,6 +60,10 @@ apply_patch_lazy() {
 
     git checkout $ABSOLUTE_FP > /dev/null 2>&1
     apply_patch
+    APPLY_RESULT=$?
+    if [ "$APPLY_RESULT" -eq 1 ]; then
+        return 1
+    fi
 
     # Check if ABSOLUTE_TEMP_FP and ABSOLUTE_FP are different
     diff $ABSOLUTE_FP $ABSOLUTE_TEMP_FP > /dev/null
@@ -66,6 +71,7 @@ apply_patch_lazy() {
         # Files are identical, move restore old file (to maintain the metadata)
         mv $ABSOLUTE_TEMP_FP $ABSOLUTE_FP
     fi
+    return 0
 }
 
 
@@ -80,10 +86,16 @@ apply_patches() {
 
     # Loop through each patch file in the the patch file array
     for PATCH in "$@"; do
+        APPLY_RESULT=-1
         if [ $lazy = 1 ]; then
             apply_patch_lazy
+            APPLY_RESULT=$?
         else
             apply_patch
+            APPLY_RESULT=$?
+        fi
+        if [ "$APPLY_RESULT" -eq 1 ]; then
+            exit 1
         fi
     done
     echo "All patches applied successfully."
