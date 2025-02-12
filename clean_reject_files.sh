@@ -14,3 +14,4 @@ cd $COLMAP_TARGET_DP
 
 # Delete previous reject files
 find . -name \*.rej | xargs rm
+find . -name \*.nnj_tmp | xargs rm
