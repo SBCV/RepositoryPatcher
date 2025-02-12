@@ -1,6 +1,6 @@
 #!/bin/bash
-SCRIPT_DP="$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd
-source "$SCRIPT_DP/patch_util.sh"
+script_dp="$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd
+source "$script_dp/patch_util.sh"
 
 # This script expects the following parameter:
 #   - mode (reject or 3way) for applying the patches
@@ -31,36 +31,36 @@ usage() {
 
 
 # Initialize variables
-TOOL=""
-PATCH_DP=""
-TARGET_DP=""
-COMMIT=()
-LAZY=0
+tool=""
+patch_dp=""
+target_dp=""
+commit=()
+lazy=0
 
 # # Options that do not require parameters by simply not specifying a colon (:) for those options.
-# OPTIONS=$(getopt -o a:b: --long paramA:,paramB: -- "$@")
-# eval set -- "$OPTIONS"
+# options=$(getopt -o a:b: --long paramA:,paramB: -- "$@")
+# eval set -- "$options"
 
 # Parse options
 while [[ $# -gt 0 ]]; do
     case "$1" in
          -t|--tool)
             shift
-            TOOL="$1"
+            tool="$1"
             shift
-            TOOL_OPTION="$1"
+            tool_option="$1"
 
             # Validate mandatory value for --tool
-            if [[ "$TOOL" != "git_apply" && "$TOOL" != "patch" ]]; then
+            if [[ "$tool" != "git_apply" && "$tool" != "patch" ]]; then
                 echo "Error: --tool must be 'git_apply' or 'patch'."
                 usage
             fi
 
             # Validate optional value based on mandatory value
-            if [[ "$TOOL" == "git_apply" && "$TOOL_OPTION" != "reject" && "$TOOL_OPTION" != "3way" && "$TOOL_OPTION" != "" ]]; then
+            if [[ "$tool" == "git_apply" && "$tool_option" != "reject" && "$tool_option" != "3way" && "$tool_option" != "" ]]; then
                 echo "Error: For git_apply, optional value must be reject or 3way."
                 usage
-            elif [[ "$TOOL" == "patch" && "$TOOL_OPTION" != "reject" && "$TOOL_OPTION" != "merge" && "$TOOL_OPTION" != "" ]]; then
+            elif [[ "$tool" == "patch" && "$tool_option" != "reject" && "$tool_option" != "merge" && "$tool_option" != "" ]]; then
                 echo "Error: For patch, optional value must be reject or merge."
                 usage
             fi
@@ -68,30 +68,30 @@ while [[ $# -gt 0 ]]; do
             ;;
          -p|--patch_dp)
             shift
-            PATCH_DP="$1"
+            patch_dp="$1"
             shift
             ;;
          -r|--target_repository_dp)
             shift
-            TARGET_REPOSITORY_DP="$1"
+            target_repository_dp="$1"
             shift
             ;;
          -c|--commit)
             shift
-            STARTING_COMMIT="$1"
+            starting_commit="$1"
             shift
             if [[ $# -gt 0 ]]; then
-                TARGET_COMMIT="$1"
+                target_commit="$1"
             else
-                TARGET_COMMIT="HEAD"
+                target_commit="HEAD"
             fi
             shift
 
-            COMMIT+=("$STARTING_COMMIT" "$TARGET_COMMIT")
+            commit+=("$starting_commit" "$target_commit")
 
             ;;
         -l|--lazy)
-            LAZY=1
+            lazy=1
             shift
             ;;
         --)
@@ -107,32 +107,32 @@ done
 
 
 # Validate mandatory parameters
-if [[ -z "$TOOL" || -z "$PATCH_DP" || -z "$TARGET_REPOSITORY_DP" || -z "$STARTING_COMMIT" ]]; then
+if [[ -z "$tool" || -z "$patch_dp" || -z "$target_repository_dp" || -z "$starting_commit" ]]; then
     echo "Error: All mandatory parameters must be provided."
     usage
 fi
 
-echo "Tool: $TOOL"
-echo "Tool Option: ${TOOL_OPTION:-None}"
-echo "Patch DP: $PATCH_DP"
-echo "Target DP: $SOURCE_DP"
-# echo "Starting Commit: ${STARTING_COMMIT}"
-# echo "Target Commit: ${TARGET_COMMIT}"
+echo "Tool: $tool"
+echo "Tool Option: ${tool_option:-None}"
+echo "Patch DP: $patch_dp"
+echo "Target DP: $target_dp"
+# echo "Starting Commit: ${starting_commit}"
+# echo "Target Commit: ${target_commit}"
 
-echo "Starting Commit: ${STARTING_COMMIT}"
-echo "Target Commit: ${TARGET_COMMIT}"
+echo "Starting Commit: ${starting_commit}"
+echo "Target Commit: ${target_commit}"
 
-echo "LAZY: ${LAZY}"
+echo "LAZY: ${lazy}"
 
-MAIN_BRANCH="main"
-VISSAT_BRANCH="vissat"
+main_branch="main"
+vissat_branch="vissat"
 
-if [ $LAZY = 1 ]; then
+if [ $lazy = 1 ]; then
 
-    apply_patches $TOOL $TOOL_OPTION $TARGET_REPOSITORY_DP $PATCH_DP $LAZY
-    APPLY_RESULT=$?
+    apply_patches $tool $tool_option $target_repository_dp $patch_dp $lazy
+    apply_result=$?
 
-    if [ $APPLY_RESULT -ne 0 ]; then
+    if [ $apply_result -ne 0 ]; then
         echo "apply_patches failed"
         echo "---------------------------------------------------------------------"
         echo "-------- Status --------"
@@ -141,83 +141,83 @@ if [ $LAZY = 1 ]; then
     else
         echo "apply_patches succeeded"
         echo "---------------------------------------------------------------------"
-        if [ $TOOL == "git_apply" ] && [ $TOOL_OPTION == "3way" ]; then
+        if [ $tool == "git_apply" ] && [ $tool_option == "3way" ]; then
             git restore --staged .
         fi
     fi
 
 else
 
-    cd $TARGET_REPOSITORY_DP
+    cd $target_repository_dp
 
-    # Ensure we are on the MAIN_BRANCH before running rev-list
-    git switch --force $MAIN_BRANCH >/dev/null 2>&1
+    # Ensure we are on the main_branch before running rev-list
+    git switch --force $main_branch >/dev/null 2>&1
 
-    # Assuming COMMIT_PARAMS is already populated with STARTING_COMMIT and TARGET_COMMIT
-    if [[ -n "$TARGET_COMMIT" && "$TARGET_COMMIT" =~ ^[0-9]+$ ]] && [ "$TARGET_COMMIT" -lt 1000 ]; then
-        # TARGET_COMMIT is a number less than 1000, treat it as an offset
+    # Assuming commit_params is already populated with starting_commit and target_commit
+    if [[ -n "$target_commit" && "$target_commit" =~ ^[0-9]+$ ]] && [ "$target_commit" -lt 1000 ]; then
+        # target_commit is a number less than 1000, treat it as an offset
 
-        OFFSET="$TARGET_COMMIT"
-        COMMIT_LIST=$(git rev-list --reverse $STARTING_COMMIT^..HEAD)
-        COMMIT_ARRAY=($COMMIT_LIST)
+        offset="$target_commit"
+        commit_list=$(git rev-list --reverse $starting_commit^..HEAD)
+        commit_array=($commit_list)
 
         # Check if the target index is within bounds
-        if [ $OFFSET -lt 0 ]; then
-            echo "Offset is negative. $OFFSET"
+        if [ $offset -lt 0 ]; then
+            echo "Offset is negative. $offset"
             exit 1
-        elif [ $OFFSET -ge ${#COMMIT_ARRAY[@]} ]; then
-            echo "Offset is out of bounds. $OFFSET"
+        elif [ $offset -ge ${#commit_array[@]} ]; then
+            echo "Offset is out of bounds. $offset"
             exit 1
         fi
-        TARGET_COMMIT=${COMMIT_ARRAY[$OFFSET]}
+        target_commit=${commit_array[$offset]}
         echo "Target commit is an offset"
     else
         echo "Target commit is an SHA"
     fi
 
-    echo "Compatible commit hash: $STARTING_COMMIT"
-    echo "Target commit hash: $TARGET_COMMIT"
+    echo "Compatible commit hash: $starting_commit"
+    echo "Target commit hash: $target_commit"
 
 
-    # Get a list of all commits from $STARTING_COMMIT to $TARGET_COMMIT
-    COMMIT_LIST=$(git rev-list --reverse $STARTING_COMMIT^..$TARGET_COMMIT)
-    COMMIT_LIST_LENGTH=$(git rev-list --count $STARTING_COMMIT^..$TARGET_COMMIT)
-    echo "Number commits from compatible to target commit: $COMMIT_LIST_LENGTH"
+    # Get a list of all commits from $starting_commit to $target_commit
+    commit_list=$(git rev-list --reverse $starting_commit^..$target_commit)
+    commit_list_length=$(git rev-list --count $starting_commit^..$target_commit)
+    echo "Number commits from compatible to target commit: $commit_list_length"
 
     # # Debugging output for commit list
     # echo "Commit list:"
-    # for COMMIT_SHA in $COMMIT_LIST; do
-    #     echo $COMMIT_SHA
+    # for commit_sha in $commit_list; do
+    #     echo $commit_sha
     # done
 
     current_iteration=0
-    for COMMIT_SHA in $COMMIT_LIST;
+    for commit_sha in $commit_list;
     do
-        if [ $current_iteration = $MAX_ITERATIONS ]; then
+        if [ $current_iteration = $max_iterations ]; then
             break
         fi
 
         echo ""
         echo "---------------------------------------------------------------------"
-        echo "-------- $COMMIT_SHA --------"
-        echo "-------------- ($(git show -s --format=%ci $COMMIT_SHA)) --------------"
-        echo "-------- $(git log -n 1 --pretty=format:%B $COMMIT_SHA | head -n 1) --------"
+        echo "-------- $commit_sha --------"
+        echo "-------------- ($(git show -s --format=%ci $commit_sha)) --------------"
+        echo "-------- $(git log -n 1 --pretty=format:%B $commit_sha | head -n 1) --------"
         echo "---------------------------------------------------------------------"
         echo ""
-        git switch --force $MAIN_BRANCH >/dev/null 2>&1
-        # Delete outdated local $VISSAT_BRANCH (if exists)
+        git switch --force $main_branch >/dev/null 2>&1
+        # Delete outdated local $vissat_branch (if exists)
         if [ -n "$(git branch --list vissat)" ]; then
-            git branch --force --delete $VISSAT_BRANCH >/dev/null
+            git branch --force --delete $vissat_branch >/dev/null
         fi
         # Order of "--force" and "--create" can not be swapped
-        git switch --force --create $VISSAT_BRANCH $COMMIT_SHA
+        git switch --force --create $vissat_branch $commit_sha
         echo "Set head to commit with hash $(git rev-parse HEAD)"
 
-        apply_patches $TOOL $TOOL_OPTION $TARGET_REPOSITORY_DP $PATCH_DP $LAZY
-        APPLY_RESULT=$?
+        apply_patches $tool $tool_option $target_repository_dp $patch_dp $lazy
+        apply_result=$?
 
-        if [ $APPLY_RESULT -ne 0 ]; then
-            echo "apply_patches failed for commit: $COMMIT_SHA"
+        if [ $apply_result -ne 0 ]; then
+            echo "apply_patches failed for commit: $commit_sha"
             echo "---------------------------------------------------------------------"
             echo "-------- Status --------"
             echo "---------------------------------------------------------------------"
@@ -225,9 +225,9 @@ else
             # Exit the loop
             break
         else
-            echo "apply_patches succeeded for commit: $COMMIT_SHA"
+            echo "apply_patches succeeded for commit: $commit_sha"
             echo "---------------------------------------------------------------------"
-            if [ $TOOL == "git_apply" ] && [ $TOOL_OPTION == "3way" ]; then
+            if [ $tool == "git_apply" ] && [ $tool_option == "3way" ]; then
                 git restore --staged .
             fi
         fi
