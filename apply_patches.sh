@@ -1,6 +1,6 @@
 #!/bin/bash
 script_dp="$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd
-source "$script_dp/patch_util.sh"
+source "$script_dp/_apply_patches_util.sh"
 
 # This script expects the following parameter:
 #   - mode (reject or 3way) for applying the patches
