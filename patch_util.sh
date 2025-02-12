@@ -60,7 +60,7 @@ apply_patch() {
 apply_patch_lazy() {
     local _tool=$1
     local _option=$2
-    local _patch_fp=$1
+    local _patch_fp=$3
 
     # Read the file names affected by the patch file
     local _relative_fp_pair=$(grep -oP '(?<=a/).*' <<< $(grep -m 1 -oP 'a/.*' $_patch_fp))
