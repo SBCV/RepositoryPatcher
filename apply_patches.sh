@@ -190,13 +190,8 @@ else
     #     echo $commit_sha
     # done
 
-    current_iteration=0
     for commit_sha in $commit_list;
     do
-        if [ $current_iteration = $max_iterations ]; then
-            break
-        fi
-
         echo ""
         echo "---------------------------------------------------------------------"
         echo "-------- $commit_sha --------"
@@ -231,7 +226,6 @@ else
                 git restore --staged .
             fi
         fi
-        current_iteration=$((current_iteration + 1))
     done
 
 fi
