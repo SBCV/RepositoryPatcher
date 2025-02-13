@@ -83,7 +83,7 @@ while [[ $# -gt 0 ]]; do
             if [[ $# -gt 0 ]]; then
                 target_commit="$1"
             else
-                target_commit="HEAD"
+                target_commit="0"
             fi
             shift
 
