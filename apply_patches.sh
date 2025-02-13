@@ -56,14 +56,33 @@ while [[ $# -gt 0 ]]; do
                 usage
             fi
 
+            # Define valid options for each tool as a single string
+            declare -A valid_options
+            valid_options["git_apply"]="reject r 3way 3"
+            valid_options["patch"]="reject r merge m"
+
             # Validate optional value based on mandatory value
-            if [[ "$tool" == "git_apply" && "$tool_option" != "reject" && "$tool_option" != "3way" && "$tool_option" != "" ]]; then
-                echo "Error: For git_apply, optional value must be reject or 3way."
-                usage
-            elif [[ "$tool" == "patch" && "$tool_option" != "reject" && "$tool_option" != "merge" && "$tool_option" != "" ]]; then
-                echo "Error: For patch, optional value must be reject or merge."
-                usage
+            if [[ -n "${valid_options[$tool]}" ]]; then
+                # Convert the space-separated string into an array
+                IFS=' ' read -r -a options_array <<< "${valid_options[$tool]}"
+
+                # Check if tool_option is valid
+                if [[ ! " ${options_array[@]} " =~ " $tool_option " ]]; then
+                    echo "Error: For $tool, optional value must be one of: ${valid_options[$tool]}."
+                    usage
+                fi
             fi
+
+            # Define abbreviations mapping
+            declare -A abbreviations
+            abbreviations["r"]="reject"
+            abbreviations["3"]="3way"
+            abbreviations["m"]="merge"
+
+            if [[ -n "${abbreviations[$tool_option]}" ]]; then
+                tool_option="${abbreviations[$tool_option]}"
+            fi
+
             shift
             ;;
          -p|--patch_dp)
