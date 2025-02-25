@@ -134,7 +134,7 @@ fi
 echo "Tool: $tool"
 echo "Tool Option: ${tool_option:-None}"
 echo "Patch DP: $patch_dp"
-echo "Target DP: $target_dp"
+echo "Target DP: $target_repository_dp"
 # echo "Starting Commit: ${starting_commit}"
 # echo "Target Commit: ${target_commit}"
 
